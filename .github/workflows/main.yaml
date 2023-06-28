@@ -1,0 +1,28 @@
+name: cfn-guard
+
+on: push
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs: 
+  cfn-iam-policy-validation: 
+    name: iam-policy-validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::{AWSAccountID}:role/github-actions-access-analyzer-role
+          aws-region: ap-southeast-2
+          role-session-name: GitHubSessionName
+        
+      - name: Install cfn-policy-validator
+        run: pip install cfn-policy-validator
+
+      - name: Validate templates
+        run: cfn-policy-validator validate --template-path ./sample-role-test.yaml --region ap-southeast-2
